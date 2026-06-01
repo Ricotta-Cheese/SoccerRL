@@ -29,9 +29,10 @@ The first numeric baseline runner is:
 
 ```bash
 python scripts/evaluate_agents.py --episodes 20 --seed 1
+python scripts/compare_baselines.py --episodes 50 --seed 1
 ```
 
-It compares scripted policies and reports wins, truncations, rewards, rule
+These compare scripted policies and report wins, truncations, rewards, rule
 violations, and ball relocations before training code is added.
 
 ## Environment
@@ -64,11 +65,13 @@ python -m pip install -r requirements.txt
 - `soccer_rl/policies.py`: scripted baseline policies
 - `soccer_rl/evaluation.py`: headless evaluation metrics for baseline policies
 - `scripts/evaluate_agents.py`: baseline evaluation runner
+- `scripts/compare_baselines.py`: all-vs-all baseline matchup matrix runner
 - `scripts/play_random.py`: random-agent demo runner
 - `scripts/play_manual.py`: human-left vs random-right debug runner
 - `tests/test_soccer_env.py`: smoke tests for environment behavior and render color checks
 - `tests/test_baseline_agents.py`: policy and evaluation smoke tests
 - `soccer_rules.md`: human-readable current gameplay rules
+- `update-log-description/v0.0.2-gameplay-training-foundation-description.md`: current v0.0.2 notes and initial baseline matrix
 - `requirements.txt`: Python dependencies
 
 ## Current Behavior
@@ -146,12 +149,13 @@ Run a short baseline evaluation smoke test:
 
 ```bash
 python scripts/evaluate_agents.py --left chase --right random --episodes 3 --seed 1 --max-cycles 120
+python scripts/compare_baselines.py --episodes 2 --seed 1 --max-cycles 120
 ```
 
 Compile-check scripts after changing runner code:
 
 ```bash
-python -m py_compile scripts/play_random.py scripts/play_manual.py scripts/evaluate_agents.py
+python -m py_compile scripts/play_random.py scripts/play_manual.py scripts/evaluate_agents.py scripts/compare_baselines.py
 ```
 
 For renderer checks in headless contexts, use SDL's dummy video driver:

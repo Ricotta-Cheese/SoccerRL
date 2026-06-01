@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from itertools import product
+from typing import Sequence
 
 from soccer_rl.envs import Soccer1v1Env
 from soccer_rl.envs.soccer_1v1 import DEFAULT_MAX_CYCLES
-from soccer_rl.policies import Policy, make_policy
+from soccer_rl.policies import POLICY_NAMES, Policy, make_policy
 
 
 AGENTS = ("left", "right")
@@ -147,6 +149,55 @@ def format_summary(summary: EvaluationSummary) -> str:
             f"ball relocations: {summary.ball_relocations}",
         ]
     )
+
+
+def run_matrix(
+    policies: Sequence[str] = POLICY_NAMES,
+    episodes: int = 20,
+    seed: int | None = None,
+    max_cycles: int = DEFAULT_MAX_CYCLES,
+) -> list[EvaluationSummary]:
+    """Run every left/right pairing from the selected policy names."""
+
+    summaries = []
+    for matchup_index, (left_policy, right_policy) in enumerate(product(policies, repeat=2)):
+        matchup_seed = None if seed is None else seed + matchup_index * 1_000
+        summaries.append(
+            run_evaluation(
+                left_policy=left_policy,
+                right_policy=right_policy,
+                episodes=episodes,
+                seed=matchup_seed,
+                max_cycles=max_cycles,
+            )
+        )
+    return summaries
+
+
+def format_matrix(summaries: Sequence[EvaluationSummary]) -> str:
+    """Return a Markdown table for baseline matchup comparisons."""
+
+    lines = [
+        "| left | right | L win | R win | trunc | goals/ep | avg len | L rew | R rew | OOB L/R | GA L/R | reloc |",
+        "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    for summary in summaries:
+        lines.append(
+            "| "
+            f"{summary.left_policy} | "
+            f"{summary.right_policy} | "
+            f"{summary.left_wins} | "
+            f"{summary.right_wins} | "
+            f"{summary.truncations} | "
+            f"{summary.goals_per_episode:.3f} | "
+            f"{summary.avg_episode_length:.1f} | "
+            f"{summary.avg_rewards['left']:.3f} | "
+            f"{summary.avg_rewards['right']:.3f} | "
+            f"{summary.out_of_bounds['left']}/{summary.out_of_bounds['right']} | "
+            f"{summary.goal_area_violations['left']}/{summary.goal_area_violations['right']} | "
+            f"{summary.ball_relocations} |"
+        )
+    return "\n".join(lines)
 
 
 def _coerce_policy(policy: str | Policy, seed: int | None) -> Policy:

@@ -88,6 +88,7 @@ Example comparisons:
 ```bash
 python scripts/evaluate_agents.py --left chase --right random --episodes 20 --seed 1
 python scripts/evaluate_agents.py --left defensive --right chase --episodes 20 --seed 1
+python scripts/compare_baselines.py --episodes 50 --seed 1
 ```
 
 The report includes wins, truncations, goals per episode, average rewards,
@@ -103,6 +104,7 @@ python -m pytest
 ## Milestone Notes
 
 - [v0.0.1 initialization description](update-log-description/v0.0.1-initialization-description.md)
+- [v0.0.2 gameplay training foundation](update-log-description/v0.0.2-gameplay-training-foundation-description.md)
 - [Current soccer rules](soccer_rules.md)
 
 ## Project Structure
@@ -116,6 +118,7 @@ SoccerRL/
       soccer_1v1.py      # 1v1 environment and Pygame renderer
   scripts/
     evaluate_agents.py   # Headless baseline evaluation runner
+    compare_baselines.py # Baseline matchup matrix runner
     play_random.py       # Random-agent demo runner
     play_manual.py       # Human-left vs random-right debug runner
   tests/

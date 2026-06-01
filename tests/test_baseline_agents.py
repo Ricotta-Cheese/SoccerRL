@@ -1,7 +1,7 @@
 import numpy as np
 
 from soccer_rl.envs import Action
-from soccer_rl.evaluation import format_summary, run_evaluation
+from soccer_rl.evaluation import format_matrix, format_summary, run_evaluation, run_matrix
 from soccer_rl.policies import (
     BALL_X,
     BALL_Y,
@@ -63,3 +63,21 @@ def test_run_evaluation_returns_aggregate_metrics():
     assert set(summary.out_of_bounds) == {"left", "right"}
     assert set(summary.goal_area_violations) == {"left", "right"}
     assert "SoccerRL evaluation" in format_summary(summary)
+
+
+def test_run_matrix_returns_all_selected_matchups():
+    summaries = run_matrix(
+        policies=("random", "chase"),
+        episodes=1,
+        seed=11,
+        max_cycles=5,
+    )
+
+    assert len(summaries) == 4
+    assert {(summary.left_policy, summary.right_policy) for summary in summaries} == {
+        ("random", "random"),
+        ("random", "chase"),
+        ("chase", "random"),
+        ("chase", "chase"),
+    }
+    assert "| left | right |" in format_matrix(summaries)
