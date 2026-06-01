@@ -6,6 +6,7 @@ This project currently contains the first playable environment slice:
 
 - A PettingZoo-style 1v1 parallel environment
 - A Pygame renderer with two random agents moving on a small soccer field
+- Scripted baseline policies and an evaluation runner for quick metrics
 - Team-colored players, goals, and scoreboard UI
 - Goal detection, reward assignment, episode termination, and reset flow
 - Ball-contest handling when robots trap the ball between them
@@ -68,6 +69,31 @@ Escape, Ctrl+C, or window close: stop
 The right player keeps using random actions. This mode is meant for checking how
 possession, kicks, wall bounces, and goal timing feel before adding training.
 
+## Evaluate Baseline Agents
+
+```bash
+python scripts/evaluate_agents.py --episodes 20 --seed 1
+```
+
+Available policies are:
+
+```text
+random
+chase
+defensive
+```
+
+Example comparisons:
+
+```bash
+python scripts/evaluate_agents.py --left chase --right random --episodes 20 --seed 1
+python scripts/evaluate_agents.py --left defensive --right chase --episodes 20 --seed 1
+```
+
+The report includes wins, truncations, goals per episode, average rewards,
+out-of-bounds penalties, goal-area violations, and ball relocations. Use it as a
+numeric baseline before changing physics, rewards, or training code.
+
 ## Test
 
 ```bash
@@ -84,9 +110,12 @@ python -m pytest
 ```text
 SoccerRL/
   soccer_rl/
+    evaluation.py        # Baseline evaluation metrics
+    policies.py          # Scripted baseline policies
     envs/
       soccer_1v1.py      # 1v1 environment and Pygame renderer
   scripts/
+    evaluate_agents.py   # Headless baseline evaluation runner
     play_random.py       # Random-agent demo runner
     play_manual.py       # Human-left vs random-right debug runner
   tests/
@@ -152,14 +181,16 @@ to build Pygame from source and could not find SDL headers. The workspace now
 uses Python 3.13.13, where `pygame==2.6.1` installs from a prebuilt wheel on
 macOS.
 
-The current branch is:
+The current development branch is:
 
 ```text
-RA_v0.0.1-initialization
+RA_v0.0.2-gameplay-training-foundation
 ```
 
 ## Next Likely Steps
 
+- Use `scripts/evaluate_agents.py` to compare random, chase, and defensive
+  baselines before tuning rules or rewards
 - Continue tuning possession, contests, and kick mechanics toward a RoboCupJunior
   1:1 Infrared/Lightweight-inspired feel
 - Add denser reward shaping for learning experiments
