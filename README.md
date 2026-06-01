@@ -8,6 +8,10 @@ This project currently contains the first playable environment slice:
 - A Pygame renderer with two random agents moving on a small soccer field
 - Team-colored players, goals, and scoreboard UI
 - Goal detection, reward assignment, episode termination, and reset flow
+- Ball-contest handling when robots trap the ball between them
+- Robot-to-robot collision handling for circular players
+- Out-of-bounds ejection when a player crosses the pale inner field line
+- Forbidden goal areas drawn as white boxes around each goal
 - Smoke tests for reset, step shape, goal rewards, and rendered goal colors
 
 ## Setup
@@ -73,6 +77,7 @@ python -m pytest
 ## Milestone Notes
 
 - [v0.0.1 initialization description](update-log-description/v0.0.1-initialization-description.md)
+- [Current soccer rules](soccer_rules.md)
 
 ## Project Structure
 
@@ -108,13 +113,19 @@ Actions:
 ```
 
 Observations are compact numeric vectors containing player position, opponent
-position, ball position, ball velocity, possession flags, and attack direction.
+position, player velocity, opponent velocity, ball position, ball velocity,
+possession flags, attack direction, ejection timer state, and ball-contest timer
+state.
 
 Rewards are sparse for now:
 
 - `+1.0` for the scoring agent
 - `-1.0` for the conceding agent
+- `OUT_OF_BOUNDS_PENALTY` when a player crosses the playable inner line
+- `GOAL_AREA_PENALTY` when a player enters either goal area box
 - `0.0` otherwise
+
+See [soccer_rules.md](soccer_rules.md) for the full current rule set.
 
 ## Tuning Physics
 
@@ -122,9 +133,12 @@ Most user-facing physics and rendering values live as module-level constants nea
 the top of `soccer_rl/envs/soccer_1v1.py`, including:
 
 - field size and goal width
-- player speed and player radius
+- goal area depth, width, and penalty
+- playable field margin and out-of-bounds ejection settings
+- player max speed, acceleration, deceleration, and radius
 - ball radius, friction, rolling resistance, stop speed, and wall bounce
-- possession radius and kick radius
+- possession radius, carried-ball contest radius, and kick radius
+- free-ball contest radius and stuck-ball relocation settings
 - kick speed and aim limit
 - render dimensions and team colors
 
@@ -146,6 +160,7 @@ RA_v0.0.1-initialization
 
 ## Next Likely Steps
 
-- Improve possession and kick mechanics
+- Continue tuning possession, contests, and kick mechanics toward a RoboCupJunior
+  1:1 Infrared/Lightweight-inspired feel
 - Add denser reward shaping for learning experiments
 - Add a baseline training script after the environment behavior stabilizes

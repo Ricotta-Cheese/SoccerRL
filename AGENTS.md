@@ -55,6 +55,7 @@ python -m pip install -r requirements.txt
 - `scripts/play_random.py`: random-agent demo runner
 - `scripts/play_manual.py`: human-left vs random-right debug runner
 - `tests/test_soccer_env.py`: smoke tests for environment behavior and render color checks
+- `soccer_rules.md`: human-readable current gameplay rules
 - `requirements.txt`: Python dependencies
 
 ## Current Behavior
@@ -85,13 +86,34 @@ Rewards are sparse:
 
 - scorer receives `+1.0`
 - opponent receives `-1.0`
-- non-goal steps receive `0.0`
+- players crossing the pale inner playable line receive `OUT_OF_BOUNDS_PENALTY`
+  and are ejected for `OUT_OF_BOUNDS_EJECTION_STEPS`
+- players entering either goal area box receive `GOAL_AREA_PENALTY` and the same
+  ejection timeout
+- other non-goal steps receive `0.0`
 
 Most physics and render-tuning values are module-level constants near the top of
 `soccer_rl/envs/soccer_1v1.py`. Prefer changing those constants before adding
 new config systems. Ball movement uses inertia plus two kinds of slowdown:
 `BALL_FRICTION` for proportional drag and `BALL_ROLLING_RESISTANCE` for steady
 rolling resistance.
+
+Player movement uses velocity with acceleration and deceleration. `PLAYER_SPEED`
+is the maximum speed, not an instant per-step move. Opposite-direction input
+resets that axis velocity before accelerating again. Active players collide as
+circles; collision resolution separates overlaps and removes closing velocity.
+When both robots trap the ball between them, the ball enters a contest state
+instead of bouncing away; prolonged contests relocate the ball to a nearby safe
+playable spot.
+
+The pale inner field line is the playable boundary for players. Ejected players
+ignore movement, kick, possession, and contest logic until their timeout expires,
+then reenter on their own side.
+
+White rectangular goal area boxes are forbidden for players but not the ball. If
+a player enters one, apply the goal-area penalty and ejection timeout.
+
+Keep `soccer_rules.md` in sync when gameplay rules or reward constants change.
 
 ## Validation
 
