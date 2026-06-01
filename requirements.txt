@@ -1,0 +1,7 @@
+gymnasium
+matplotlib
+numpy
+pettingzoo
+pygame
+pytest
+tqdm
