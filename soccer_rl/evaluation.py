@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import csv
+import json
 from dataclasses import dataclass
 from itertools import product
+from pathlib import Path
 from typing import Sequence
 
 from soccer_rl.envs import Soccer1v1Env
@@ -12,6 +15,24 @@ from soccer_rl.policies import POLICY_NAMES, Policy, make_policy
 
 
 AGENTS = ("left", "right")
+SUMMARY_FIELDNAMES = (
+    "episodes",
+    "left_policy",
+    "right_policy",
+    "left_wins",
+    "right_wins",
+    "truncations",
+    "goals",
+    "goals_per_episode",
+    "avg_episode_length",
+    "left_avg_reward",
+    "right_avg_reward",
+    "left_out_of_bounds",
+    "right_out_of_bounds",
+    "left_goal_area_violations",
+    "right_goal_area_violations",
+    "ball_relocations",
+)
 
 
 @dataclass
@@ -198,6 +219,66 @@ def format_matrix(summaries: Sequence[EvaluationSummary]) -> str:
             f"{summary.ball_relocations} |"
         )
     return "\n".join(lines)
+
+
+def summary_to_record(summary: EvaluationSummary) -> dict[str, int | float | str]:
+    """Flatten an evaluation summary for CSV/JSON export."""
+
+    return {
+        "episodes": summary.episodes,
+        "left_policy": summary.left_policy,
+        "right_policy": summary.right_policy,
+        "left_wins": summary.left_wins,
+        "right_wins": summary.right_wins,
+        "truncations": summary.truncations,
+        "goals": summary.goals,
+        "goals_per_episode": summary.goals_per_episode,
+        "avg_episode_length": summary.avg_episode_length,
+        "left_avg_reward": summary.avg_rewards["left"],
+        "right_avg_reward": summary.avg_rewards["right"],
+        "left_out_of_bounds": summary.out_of_bounds["left"],
+        "right_out_of_bounds": summary.out_of_bounds["right"],
+        "left_goal_area_violations": summary.goal_area_violations["left"],
+        "right_goal_area_violations": summary.goal_area_violations["right"],
+        "ball_relocations": summary.ball_relocations,
+    }
+
+
+def summaries_to_records(
+    summaries: Sequence[EvaluationSummary],
+) -> list[dict[str, int | float | str]]:
+    """Flatten many summaries for persistent experiment artifacts."""
+
+    return [summary_to_record(summary) for summary in summaries]
+
+
+def write_summaries_csv(
+    summaries: Sequence[EvaluationSummary],
+    path: str | Path,
+) -> Path:
+    """Write evaluation summaries as a flat CSV file."""
+
+    output_path = Path(path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with output_path.open("w", newline="", encoding="utf-8") as output_file:
+        writer = csv.DictWriter(output_file, fieldnames=SUMMARY_FIELDNAMES)
+        writer.writeheader()
+        writer.writerows(summaries_to_records(summaries))
+    return output_path
+
+
+def write_summaries_json(
+    summaries: Sequence[EvaluationSummary],
+    path: str | Path,
+) -> Path:
+    """Write evaluation summaries as JSON records."""
+
+    output_path = Path(path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with output_path.open("w", encoding="utf-8") as output_file:
+        json.dump(summaries_to_records(summaries), output_file, indent=2)
+        output_file.write("\n")
+    return output_path
 
 
 def _coerce_policy(policy: str | Policy, seed: int | None) -> Policy:

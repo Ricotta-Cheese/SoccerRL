@@ -1,7 +1,15 @@
 import numpy as np
 
 from soccer_rl.envs import Action
-from soccer_rl.evaluation import format_matrix, format_summary, run_evaluation, run_matrix
+from soccer_rl.evaluation import (
+    format_matrix,
+    format_summary,
+    run_evaluation,
+    run_matrix,
+    summaries_to_records,
+    write_summaries_csv,
+    write_summaries_json,
+)
 from soccer_rl.policies import (
     BALL_X,
     BALL_Y,
@@ -95,3 +103,22 @@ def test_run_matrix_returns_all_selected_matchups():
         ("chase", "chase"),
     }
     assert "| left | right |" in format_matrix(summaries)
+
+
+def test_summary_exports_write_csv_and_json(tmp_path):
+    summaries = run_matrix(
+        policies=("random", "chase"),
+        episodes=1,
+        seed=12,
+        max_cycles=5,
+    )
+
+    csv_path = write_summaries_csv(summaries, tmp_path / "baseline.csv")
+    json_path = write_summaries_json(summaries, tmp_path / "baseline.json")
+    records = summaries_to_records(summaries)
+
+    assert csv_path.read_text(encoding="utf-8").splitlines()[0].startswith(
+        "episodes,left_policy,right_policy"
+    )
+    assert '"left_policy": "random"' in json_path.read_text(encoding="utf-8")
+    assert records[0]["goals"] == records[0]["left_wins"] + records[0]["right_wins"]

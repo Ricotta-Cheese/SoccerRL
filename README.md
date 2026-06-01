@@ -91,6 +91,7 @@ python scripts/evaluate_agents.py --left chase --right random --episodes 20 --se
 python scripts/evaluate_agents.py --left safe_chase --right random --episodes 20 --seed 1
 python scripts/evaluate_agents.py --left defensive --right chase --episodes 20 --seed 1
 python scripts/compare_baselines.py --episodes 50 --seed 1
+python scripts/compare_baselines.py --episodes 200 --seed 1 --csv results/baseline_matrix.csv --json results/baseline_matrix.json
 ```
 
 To watch the same scripted policies move in a Pygame window:
