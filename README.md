@@ -93,6 +93,12 @@ python scripts/evaluate_agents.py --left defensive --right chase --episodes 20 -
 python scripts/compare_baselines.py --episodes 50 --seed 1
 ```
 
+To watch the same scripted policies move in a Pygame window:
+
+```bash
+python scripts/play_agents.py --left safe_chase --right random --seed 1
+```
+
 The report includes wins, truncations, goals per episode, average rewards,
 out-of-bounds penalties, goal-area violations, and ball relocations. Use it as a
 numeric baseline before changing physics, rewards, or training code.
@@ -121,6 +127,7 @@ SoccerRL/
   scripts/
     evaluate_agents.py   # Headless baseline evaluation runner
     compare_baselines.py # Baseline matchup matrix runner
+    play_agents.py       # Visual scripted-policy runner
     play_random.py       # Random-agent demo runner
     play_manual.py       # Human-left vs random-right debug runner
   tests/
