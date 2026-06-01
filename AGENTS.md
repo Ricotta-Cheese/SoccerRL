@@ -35,6 +35,9 @@ python scripts/compare_baselines.py --episodes 50 --seed 1
 These compare scripted policies and report wins, truncations, rewards, rule
 violations, and ball relocations before training code is added.
 
+Available scripted policies are currently `random`, `chase`, `safe_chase`, and
+`defensive`.
+
 ## Environment
 
 Use the repository-local virtual environment:

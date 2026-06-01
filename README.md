@@ -80,6 +80,7 @@ Available policies are:
 ```text
 random
 chase
+safe_chase
 defensive
 ```
 
@@ -87,6 +88,7 @@ Example comparisons:
 
 ```bash
 python scripts/evaluate_agents.py --left chase --right random --episodes 20 --seed 1
+python scripts/evaluate_agents.py --left safe_chase --right random --episodes 20 --seed 1
 python scripts/evaluate_agents.py --left defensive --right chase --episodes 20 --seed 1
 python scripts/compare_baselines.py --episodes 50 --seed 1
 ```

@@ -7,10 +7,12 @@ from soccer_rl.policies import (
     BALL_Y,
     ChaseBallPolicy,
     HAS_BALL,
+    LEFT_GOAL_AREA,
     OWN_EJECTION_RATIO,
     PLAYER_X,
     PLAYER_Y,
     RandomPolicy,
+    SafeChaseBallPolicy,
 )
 
 
@@ -45,6 +47,18 @@ def test_chase_policy_moves_toward_ball_and_kicks_when_close():
     observation[OWN_EJECTION_RATIO] = 1.0
 
     assert policy.act("left", observation) == int(Action.STAY)
+
+
+def test_safe_chase_avoids_stepping_into_goal_area():
+    policy = SafeChaseBallPolicy()
+    observation = np.zeros(18, dtype=np.float32)
+    area_left, area_top, area_right, area_bottom = LEFT_GOAL_AREA
+    observation[PLAYER_X] = (area_left + area_right) * 0.5
+    observation[PLAYER_Y] = area_top - 0.005
+    observation[BALL_X] = (area_left + area_right) * 0.5
+    observation[BALL_Y] = (area_top + area_bottom) * 0.5
+
+    assert policy.act("left", observation) == int(Action.UP)
 
 
 def test_run_evaluation_returns_aggregate_metrics():
